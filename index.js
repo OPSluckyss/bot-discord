@@ -12,6 +12,18 @@ const {
     VoiceConnectionStatus
 } = require("@discordjs/voice");
 
+const http = require("http");
+
+
+// ==========================
+// PORTA PARA O RENDER
+// ==========================
+
+http.createServer((req, res) => {
+    res.write("Bot online");
+    res.end();
+}).listen(process.env.PORT || 3000);
+
 
 // ==========================
 // TOKEN
@@ -92,9 +104,11 @@ function entrarCall(){
 
 
 
+
+
 // Bot online
 
-client.once("ready", async ()=>{
+client.once("clientReady", async ()=>{
 
 
     console.log(`✅ ${client.user.tag} online`);
@@ -227,8 +241,6 @@ client.on("interactionCreate", async interaction=>{
 
 
 
-    // DADO NORMAL
-
     if(interaction.commandName === "dado"){
 
 
@@ -329,7 +341,7 @@ client.on("messageCreate", message => {
 
 
 
-// Quando alguém entra na call
+// Reconectar na call
 
 client.on("voiceStateUpdate",(oldState,newState)=>{
 
@@ -357,46 +369,15 @@ client.on("voiceStateUpdate",(oldState,newState)=>{
     ){
 
 
-        console.log(
-
-            "⚠️ Fui removido da call"
-
-        );
-
+        console.log("⚠️ Fui removido da call");
 
 
         setTimeout(()=>{
 
-
             entrarCall();
 
+        },3000);
 
-
-        },1000);
-
-
-
-        const canalTexto =
-
-        oldState.guild.channels.cache.find(
-
-            c => c.isTextBased()
-
-        );
-
-
-
-        if(canalTexto){
-
-
-            canalTexto.send(
-
-                "hoje nn troxa 😎"
-
-            ).catch(()=>{});
-
-
-        }
 
 
     }
@@ -408,14 +389,12 @@ client.on("voiceStateUpdate",(oldState,newState)=>{
 
 
 
-// Reconexão eterna
+// Verificação de conexão
 
 setInterval(()=>{
 
 
-    const connection =
-
-    getVoiceConnection(GUILD_ID);
+    const connection = getVoiceConnection(GUILD_ID);
 
 
 
@@ -430,14 +409,12 @@ setInterval(()=>{
 
     else if(
 
-        connection.state.status ===
-
-        VoiceConnectionStatus.Disconnected
+        connection.state.status === VoiceConnectionStatus.Disconnected
 
     ){
 
 
-        entrarCall();
+        connection.rejoin();
 
 
     }
