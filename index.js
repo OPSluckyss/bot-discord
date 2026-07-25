@@ -17,7 +17,6 @@ const {
 // COLOQUE SEU TOKEN AQUI
 // ==========================
 
-require("dotenv").config();
 
 const TOKEN = process.env.TOKEN;
 
