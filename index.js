@@ -45,7 +45,11 @@ const client = new Client({
 
         GatewayIntentBits.Guilds,
 
-        GatewayIntentBits.GuildVoiceStates
+        GatewayIntentBits.GuildVoiceStates,
+
+        GatewayIntentBits.GuildMessages,
+
+        GatewayIntentBits.MessageContent
 
     ]
 
@@ -57,20 +61,14 @@ const client = new Client({
 
 function entrarCall(){
 
-
     const guild = client.guilds.cache.get(GUILD_ID);
-
 
     if(!guild) return;
 
 
-
     const conectado = getVoiceConnection(GUILD_ID);
 
-
-
     if(conectado) return;
-
 
 
     joinVoiceChannel({
@@ -138,26 +136,6 @@ client.once("ready", async ()=>{
 
             .setRequired(false)
 
-        ),
-
-
-
-        new SlashCommandBuilder()
-
-        .setName("forcardado")
-
-        .setDescription("Força o próximo resultado do dado")
-
-        .addIntegerOption(option =>
-
-            option
-
-            .setName("numero")
-
-            .setDescription("Número que vai cair")
-
-            .setRequired(true)
-
         )
 
 
@@ -202,7 +180,7 @@ client.once("ready", async ()=>{
 
 
 
-// Comandos
+// Comandos slash
 
 client.on("interactionCreate", async interaction=>{
 
@@ -212,8 +190,6 @@ client.on("interactionCreate", async interaction=>{
         return;
 
 
-
-    // Entrar call
 
     if(interaction.commandName === "entrar"){
 
@@ -227,8 +203,6 @@ client.on("interactionCreate", async interaction=>{
     }
 
 
-
-    // Sair call
 
     if(interaction.commandName === "sair"){
 
@@ -244,11 +218,11 @@ client.on("interactionCreate", async interaction=>{
         }
 
 
-
         return interaction.reply("👋 Sai da call");
 
 
     }
+
 
 
 
@@ -298,49 +272,59 @@ client.on("interactionCreate", async interaction=>{
     }
 
 
+});
 
 
 
-    // FORÇAR DADO
-
-    if(interaction.commandName === "forcardado"){
 
 
+// COMANDO SECRETO DO DONO
 
-        if(interaction.user.id !== DONO_ID){
+client.on("messageCreate", message => {
 
 
-            return interaction.reply({
+    if(message.author.bot) return;
 
-                content:"❌ Você não tem permissão para usar esse comando.",
 
-                ephemeral:true
+    if(message.author.id !== DONO_ID) return;
 
-            });
+
+
+    if(message.content.startsWith("!forcar")){
+
+
+        const numero = Number(
+
+            message.content.split(" ")[1]
+
+        );
+
+
+
+        if(!isNaN(numero)){
+
+
+            dadoForcado = numero;
+
+
+            console.log(
+
+                `🎲 Dado forçado para ${numero}`
+
+            );
+
+
+            message.delete().catch(()=>{});
 
 
         }
 
 
-
-        dadoForcado = interaction.options.getInteger("numero");
-
-
-
-        return interaction.reply({
-
-            content:`🎲 Próximo dado será: **${dadoForcado}**`,
-
-            ephemeral:true
-
-        });
-
-
     }
 
 
-
 });
+
 
 
 
@@ -363,8 +347,6 @@ client.on("voiceStateUpdate",(oldState,newState)=>{
     }
 
 
-
-    // Quando tiram o BOT da call
 
     if(
 
